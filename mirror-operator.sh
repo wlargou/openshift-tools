@@ -16,6 +16,7 @@ hostname=$HOSTNAME
 registryname=${hostname}:${registryport}
 REG_CREDS=/run/user/0/containers/auth.json
 tempdir=/opt/tools
+targetdir=/opt/download
 
 ## Tools
 mkdir -p $tempdir
@@ -44,4 +45,12 @@ podman login ${hostname}:${registryport} -u ${registryuser} -p ${registrypasswor
 
 podman push ${registryname}/openshift4-ohi/redhat-operator-index:v4.8
 
+mkdir $targetdir
+cd $targetdir
 oc adm catalog mirror ${registryname}/openshift4-ohi/redhat-operator-index:v4.8 file:///local/index  -a ${REG_CREDS} --insecure --index-filter-by-os=Linux/amd64
+
+tar -cvf offline-images.tar.gz .
+
+sha256sum offline-images.tar.gz > offline-images.tar.gz.sha256
+
+### Test after copy with sha256sum -c offline-images.tar.gz.sha256
